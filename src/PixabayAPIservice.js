@@ -1,3 +1,5 @@
+import axios from "axios";
+
 const KEY_API = '37172974-4e93c60554a40da27d1468fe2';
 
 export default class PixabayAPIservice {
@@ -5,14 +7,11 @@ export default class PixabayAPIservice {
     this.page = 1;
     this.serchItem = '';
   }
-  getItem() {
+  async getItem() {
     const url = `https://pixabay.com/api/?key=${KEY_API}&q=${this.serchItem}&image_type=photo&orientation=horizontal&safesearch=true&per_page=40&page=${this.page}`;
-    return fetch(url)
-      .then(res => res.json())
-      .then(data => {
-        this.incrementPage();
-        return data;
-      });
+    const res = await axios.get(url)
+      this.incrementPage();
+      return res.data;       
   }
 
   setSearchValue(inputValue) {

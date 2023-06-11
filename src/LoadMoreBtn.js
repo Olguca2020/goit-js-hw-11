@@ -2,7 +2,7 @@ export default class LoadMoreBtn {
   constructor({ selector, isHidden = false }) {
     this.button = document.querySelector(selector);
     // if (isHidden) this.hide
-    isHidden && this.hide;
+    isHidden && this.hide();
   }
 
   enable() {

@@ -1,4 +1,4 @@
-.hidden {
+.load-more.hidden {
   display: none;
 }
 
@@ -6,13 +6,22 @@ button:disabled {
   background-color: rgb(253, 253, 253);
   cursor: not-allowed;
 }
+.load-more{
+  border: none;
+  background-color: rgba(45, 45, 233, 0.731);
+  color: white;
+  cursor: pointer;
+  margin: 0 auto;
+  margin-top: 50px;
+  display: block;}
+
 .box{
   background-color: #ab73ef;
   padding: 10px;
   
 }
 .search-form{
-  width: 50%;
+  width: 30%;
   margin-left: auto;
   margin-right: auto;
 }

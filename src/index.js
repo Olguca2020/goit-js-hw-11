@@ -6,37 +6,67 @@ const refs = {
   input: document.querySelector('[name="searchQuery"]'),
   form: document.querySelector(`#search-form`),
   divGallery: document.querySelector(`div.gallery`),
+  totalResult: document.querySelector(`.totalResalt`),
 };
 const pixabayAPIservice = new PixabayAPIservice();
 const loadMoreBtn = new LoadMoreBtn({
   selector: '.load-more',
-  isHidden: false,
+  isHidden: true,
 });
 loadMoreBtn.button.addEventListener('click', fetchCards);
 refs.form.addEventListener(`submit`, onSubmit);
 
-function fetchCards(){}
+async function fetchCards() {
+  loadMoreBtn.disable();
+  try {
+    const markup = await generatCardsMarkup()
+    if (markup === undefined) throw new Error
+    
+    appendNewToList(markup);
+  }
+  catch (err) {
+    onError(err)
+  }
+    loadMoreBtn.enable();
+  };
+
 
 function onSubmit(e) {
   e.preventDefault();
-  const inputValue = refs.form.elements.searchQuery.value;
+  const inputValue = refs.form.elements.searchQuery.value.trim();
 
   pixabayAPIservice.setSearchValue(inputValue);
-  pixabayAPIservice
-    .getItem()
-    .then(({ hits }) => {
-      if (hits.length === 0)
-        throw new Error(
-          `Sorry, there are no images matching your search query. Please try again.`
-        );
-      return hits.reduce(
-        (marcup, currentCard) => marcup + createMarkup(currentCard),
-        ''
-      );
-    })
-    .then(updateList)
+  if (inputValue === '') {
+    const err = 'Please enter a search query';
+    onError(new Error(err));
+    return;
+  }
+  clearNewList();
+  loadMoreBtn.show();
+  pixabayAPIservice.resetPage();
+
+  fetchCards()
     .catch(onError)
     .finally(() => refs.form.reset());
+}
+async function generatCardsMarkup() {
+  try{const { hits, totalHits } = await pixabayAPIservice.getItem();
+if (hits.length === 0)
+      throw new Error(
+        `Sorry, there are no images matching your search query. Please try again.`
+      );
+    // console.log(totalHits);
+    refs.totalResult.textContent = `Hooray! We found ${totalHits} totalHits images.`;
+    return hits.reduce(
+      (marcup, currentCard) => marcup + createMarkup(currentCard),
+      ''
+    );
+    
+  }
+  catch (err) {
+    throw err;
+  }
+  
 }
 
 function createMarkup({
@@ -68,10 +98,16 @@ function createMarkup({
 </div>`;
 }
 
-function updateList(murcup) {
-  refs.divGallery.innerHTML = murcup;
+function appendNewToList(murcup) {
+  refs.divGallery.insertAdjacentHTML('beforeend', murcup);
+}
+
+function clearNewList() {
+  refs.divGallery.innerHTML = '';
 }
 
 function onError(err) {
+  clearNewList();
   Notiflix.Notify.failure(`Error: ${err.message}`);
+  loadMoreBtn.hide();
 }
