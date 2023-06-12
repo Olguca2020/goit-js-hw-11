@@ -10,11 +10,16 @@ const refs = {
   divGallery: document.querySelector(`div.gallery`),
   totalResult: document.querySelector(`.totalResalt`),
 };
+
 const pixabayAPIservice = new PixabayAPIservice();
 const loadMoreBtn = new LoadMoreBtn({
   selector: '.load-more',
   isHidden: true,
 });
+let gallery = new SimpleLightbox('.gallery a', {
+  captionDelay: 250,
+});
+
 loadMoreBtn.button.addEventListener('click', fetchCards);
 refs.form.addEventListener(`submit`, onSubmit);
 
@@ -44,11 +49,11 @@ function onSubmit(e) {
   clearNewList();
   loadMoreBtn.show();
   pixabayAPIservice.resetPage();
-  gallery.refresh();
+  
   fetchCards()
     .catch(onError)
     .finally(() => {
-      refs.form.reset();
+      refs.form.reset();    
     });
 }
 async function generatCardsMarkup() {
@@ -56,15 +61,20 @@ async function generatCardsMarkup() {
     const { hits, totalHits } = await pixabayAPIservice.getItem();
     const nextPage = pixabayAPIservice.page;
     const maxPage = Math.ceil(totalHits / 40);
+    
+     if (pixabayAPIservice.page === 2) {
+       Notiflix.Notify.success(
+         `Hooray! We found ${totalHits} totalHits images.`
+       );
+     }
     if (nextPage > maxPage) {
       loadMoreBtn.hide();
     }
     if (hits.length === 0)
       throw new Error(
         `Sorry, there are no images matching your search query. Please try again.`
-      );
-    // console.log(totalHits);
-    alert(`Hooray! We found ${totalHits} totalHits images.`);
+      );     
+    
     return hits.reduce(
       (marcup, currentCard) => marcup + createMarkup(currentCard),
       ''
@@ -108,6 +118,7 @@ function createMarkup({
 
 function appendNewToList(murcup) {
   refs.divGallery.insertAdjacentHTML('beforeend', murcup);
+  gallery.refresh();
 }
 
 function clearNewList() {
@@ -119,7 +130,5 @@ function onError(err) {
   Notiflix.Notify.failure(`Error: ${err.message}`);
   loadMoreBtn.hide();
 }
-let gallery = new SimpleLightbox('.gallery a', {
-  captionDelay: 250,
-});
-gallery.on('show.simplelightbox', function () {});
+
+
