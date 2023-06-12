@@ -2,6 +2,7 @@ import Notiflix from 'notiflix';
 import PixabayAPIservice from './PixabayAPIservice.js';
 import LoadMoreBtn from './LoadMoreBtn.js';
 
+
 const refs = {
   input: document.querySelector('[name="searchQuery"]'),
   form: document.querySelector(`#search-form`),
@@ -50,13 +51,20 @@ function onSubmit(e) {
     .finally(() => refs.form.reset());
 }
 async function generatCardsMarkup() {
-  try{const { hits, totalHits } = await pixabayAPIservice.getItem();
+  try {
+    const { hits, totalHits } = await pixabayAPIservice.getItem();
+    const nextPage = pixabayAPIservice.page;
+    const maxPage = Math.ceil(totalHits / 40);    
+    if (nextPage > maxPage) {
+      loadMoreBtn.hide();
+      
+    }
 if (hits.length === 0)
       throw new Error(
         `Sorry, there are no images matching your search query. Please try again.`
       );
     // console.log(totalHits);
-    refs.totalResult.textContent = `Hooray! We found ${totalHits} totalHits images.`;
+    alert(`Hooray! We found ${totalHits} totalHits images.`);
     return hits.reduce(
       (marcup, currentCard) => marcup + createMarkup(currentCard),
       ''
@@ -65,6 +73,7 @@ if (hits.length === 0)
   }
   catch (err) {
     throw err;
+    
   }
   
 }
@@ -80,7 +89,10 @@ function createMarkup({
 }) {
   return `
   <div class="photo-card">
-  <img src="${webformatURL}" alt="${tags}" loading="lazy" />
+  <a class="gallery__link" href="${largeImageURL}">
+    <img class="gallery__image" src="${webformatURL}" alt="${tags}" loading="lazy" />
+    </a>
+  
   <div class="info">
     <p class="info-item">
       <b>Likes ${likes}</b>
@@ -111,3 +123,8 @@ function onError(err) {
   Notiflix.Notify.failure(`Error: ${err.message}`);
   loadMoreBtn.hide();
 }
+ let gallery = new SimpleLightbox('.gallery a', {
+   captionsData: 'alt',
+   captionDelay: 250,
+ });
+ gallery.on('show.simplelightbox', function () {});
