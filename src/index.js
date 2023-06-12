@@ -1,6 +1,8 @@
 import Notiflix from 'notiflix';
 import PixabayAPIservice from './PixabayAPIservice.js';
 import LoadMoreBtn from './LoadMoreBtn.js';
+import SimpleLightbox from 'simplelightbox';
+import 'simplelightbox/dist/simple-lightbox.min.css';
 
 
 const refs = {
@@ -48,7 +50,10 @@ function onSubmit(e) {
 
   fetchCards()
     .catch(onError)
-    .finally(() => refs.form.reset());
+    .finally(() => {
+      refs.form.reset();
+      gallery.refresh();
+    });
 }
 async function generatCardsMarkup() {
   try {
@@ -68,14 +73,11 @@ if (hits.length === 0)
     return hits.reduce(
       (marcup, currentCard) => marcup + createMarkup(currentCard),
       ''
-    );
-    
+    );    
   }
   catch (err) {
-    throw err;
-    
-  }
-  
+    throw err;    
+  }  
 }
 
 function createMarkup({
