@@ -4,7 +4,6 @@ import LoadMoreBtn from './LoadMoreBtn.js';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 
-
 const refs = {
   input: document.querySelector('[name="searchQuery"]'),
   form: document.querySelector(`#search-form`),
@@ -22,17 +21,15 @@ refs.form.addEventListener(`submit`, onSubmit);
 async function fetchCards() {
   loadMoreBtn.disable();
   try {
-    const markup = await generatCardsMarkup()
-    if (markup === undefined) throw new Error
-    
-    appendNewToList(markup);
-  }
-  catch (err) {
-    onError(err)
-  }
-    loadMoreBtn.enable();
-  };
+    const markup = await generatCardsMarkup();
+    if (markup === undefined) throw new Error();
 
+    appendNewToList(markup);
+  } catch (err) {
+    onError(err);
+  }
+  loadMoreBtn.enable();
+}
 
 function onSubmit(e) {
   e.preventDefault();
@@ -47,24 +44,22 @@ function onSubmit(e) {
   clearNewList();
   loadMoreBtn.show();
   pixabayAPIservice.resetPage();
-
+  gallery.refresh();
   fetchCards()
     .catch(onError)
     .finally(() => {
       refs.form.reset();
-      gallery.refresh();
     });
 }
 async function generatCardsMarkup() {
   try {
     const { hits, totalHits } = await pixabayAPIservice.getItem();
     const nextPage = pixabayAPIservice.page;
-    const maxPage = Math.ceil(totalHits / 40);    
+    const maxPage = Math.ceil(totalHits / 40);
     if (nextPage > maxPage) {
       loadMoreBtn.hide();
-      
     }
-if (hits.length === 0)
+    if (hits.length === 0)
       throw new Error(
         `Sorry, there are no images matching your search query. Please try again.`
       );
@@ -73,11 +68,10 @@ if (hits.length === 0)
     return hits.reduce(
       (marcup, currentCard) => marcup + createMarkup(currentCard),
       ''
-    );    
+    );
+  } catch (err) {
+    throw err;
   }
-  catch (err) {
-    throw err;    
-  }  
 }
 
 function createMarkup({
@@ -125,7 +119,7 @@ function onError(err) {
   Notiflix.Notify.failure(`Error: ${err.message}`);
   loadMoreBtn.hide();
 }
- let gallery = new SimpleLightbox('.gallery a', {
-      captionDelay: 250,
- });
- gallery.on('show.simplelightbox', function () {});
+let gallery = new SimpleLightbox('.gallery a', {
+  captionDelay: 250,
+});
+gallery.on('show.simplelightbox', function () {});
