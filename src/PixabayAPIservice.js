@@ -25,3 +25,6 @@ export default class PixabayAPIservice {
     this.page = 1;
   }
 }
+
+
+
